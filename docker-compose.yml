@@ -35,6 +35,7 @@ services:
         max-size: '1m'
         max-file: '1'
     volumes:
+      - ./static:/var/www/static
       - ./nginx:/etc/nginx/conf.d
       - ./letsencrypt:/etc/letsencrypt
       - certbotdata:/var/www/certbot
