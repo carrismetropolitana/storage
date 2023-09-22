@@ -3,10 +3,6 @@ version: '3.9'
 volumes:
   certbotdata:
 
-networks:
-  default:
-    driver: bridge
-
 services:
   #
 
@@ -15,6 +11,11 @@ services:
 
   watchtower:
     image: containrrr/watchtower
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -28,7 +29,7 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
 
   nginx:
-    image: nginx:stable
+    image: nginx:alpine-slim
     restart: unless-stopped
     logging:
       options:
@@ -39,8 +40,6 @@ services:
       - ./nginx:/etc/nginx/conf.d
       - ./letsencrypt:/etc/letsencrypt
       - certbotdata:/var/www/certbot
-    networks:
-      - default
     ports:
       - 80:80
       - 443:443
@@ -52,6 +51,10 @@ services:
   certbot:
     image: certbot/certbot
     restart: unless-stopped
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - certbotdata:/var/www/certbot
@@ -63,8 +66,29 @@ services:
   minio:
     image: minio/minio:latest
     restart: unless-stopped
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
     volumes:
       - /miniodata:/data
     env_file:
       - .env
     command: 'server /data --console-address ":9001"'
+
+  # # # # # # # # # # # # # # # # # # # # #
+  # # # # # # # # # # # # # # # # # # # # #
+
+  tts-generator:
+    image: ghcr.io/carrismetropolitana/tts-generator:production
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: '1m'
+        max-file: '1'
+    volumes:
+      - ./static/tts/live:/app/outputs
+      - ./tts_generator/credentials:/app/credentials
+      - ./tts_generator/trackers:/app/trackers
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/google-cloud-key.json
