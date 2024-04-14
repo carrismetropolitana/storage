@@ -1,5 +1,3 @@
-version: '3.9'
-
 volumes:
   certbotdata:
 
@@ -63,8 +61,8 @@ services:
   # # # # # # # # # # # # # # # # # # # # #
   # # # # # # # # # # # # # # # # # # # # #
 
-  tts-generator:
-    image: ghcr.io/carrismetropolitana/tts-generator:production
+  tts-daemon:
+    image: ghcr.io/carrismetropolitana/tts-daemon:production
     restart: unless-stopped
     logging:
       options:
@@ -72,7 +70,7 @@ services:
         max-file: '1'
     volumes:
       - ./static/tts/live:/app/outputs
-      - ./tts_generator/credentials:/app/credentials
-      - ./tts_generator/trackers:/app/trackers
+      - ./tts_daemon/credentials:/app/credentials
+      - ./tts_daemon/trackers:/app/trackers
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials/google-cloud-key.json
